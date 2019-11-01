@@ -11,6 +11,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +39,85 @@ public class lwm2mClientResource {
 	
 	
 	/*
+	 * INFORMATION REPORTING - NOTIFY 
+	 */
+	
+	
+	
+	
+	/*
+	 * DEVICE MANAGEMENT - READ
+	 */
+	@RequestMapping(method = RequestMethod.GET, path="dvmgt/{deviceId}/{objectId}")
+	public String readDevice_dvmgt(@PathVariable("objectId") String objectId , @PathVariable("deviceId") String deviceId) {
+		
+		Lwm2mClientDatabase db = Lwm2mClientDatabase.getInstance();
+		return db.readDeviceDetails(objectId);
+		
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, path="dvmgt/{deviceId}/{objectId}/{resourceId}")
+	public String readDevice_dvmgt(@PathVariable("objectId") String objectId , @PathVariable("deviceId") String deviceId ,
+			@PathVariable("resourceId") String resourceId) {
+		
+		Lwm2mClientDatabase db = Lwm2mClientDatabase.getInstance();
+		return db.readDeviceDetails(objectId,resourceId);
+		
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, path="dvmgt/discover/{deviceId}/{objectId}")
+	public String discoverDevice_dvmgt(@PathVariable("objectId") String objectId , @PathVariable("deviceId") String deviceId) {
+		
+		Lwm2mClientDatabase db = Lwm2mClientDatabase.getInstance();
+		return db.discoverDevice(deviceId,objectId);
+	}
+	
+	
+	/*
+	 * DEVICE MANAGEMENT - WRITE 
+	 */
+	@PutMapping(value="dvmgt/{deviceId}/{objectId}/{resourceId}" , consumes = "text/plain" , produces = "text/plain")
+	public void writeDevice_dvmgt(@RequestBody String newValue , @PathVariable("objectId") String objectId , @PathVariable("deviceId") String deviceId ,
+			@PathVariable("resourceId") String resourceId) {
+				
+		Lwm2mClientDatabase db = Lwm2mClientDatabase.getInstance();
+		db.writeDeviceObject(objectId,resourceId,newValue);
+					
+	}
+	
+	/*
+	 * DEVICE MANAGEMENT - WRITE ATTRIBUTE	
+	 */
+	@PutMapping(value="attribute/{deviceId}/{objectId}" , consumes = "text/plain" , produces = "text/plain")
+	public String writeDeviceAttribute_dvmgt(@RequestBody String newpmax , @PathVariable("objectId") String objectId , @PathVariable("deviceId") String deviceId) {
+		
+		
+		Lwm2mClientDatabase db = Lwm2mClientDatabase.getInstance();
+		db.writeDeviceObjectAttribute(deviceId, objectId, newpmax);
+		
+		if(Integer.parseInt(newpmax) > 200) {
+			return "NOTIFICATION UPDATE - pmax = "+newpmax;
+		}
+		
+		return newpmax;
+					
+	}
+	
+
+	/*
+	 * DEVICE MANAGEMENT - CREATE 
+	 */
+	@PostMapping(value = "dvmgt/create", consumes = "text/plain" , produces = "text/plain")
+	public String createDeviceObject_dvmgt(@RequestBody String obj) {
+		
+		Lwm2mClientDatabase db = Lwm2mClientDatabase.getInstance();
+		db.createDeviceObject(obj);
+		return obj;
+		
+	}
+	
+	
+	/*
 	 * BOOSTRAP - REQUEST
 	 */
 	@RequestMapping(method = RequestMethod.POST , path = "request/{deviceId}")
@@ -45,6 +127,7 @@ public class lwm2mClientResource {
 		Lwm2mClientDatabase db = Lwm2mClientDatabase.getInstance();
 		String bootStrapServerURL = db.getDevice(deviceId).getBoostrapServerURI();
 				
+		
 		BootstrapInfo bInfo = restTemplate.getForObject(bootStrapServerURL+"/"+deviceId, BootstrapInfo.class);
 		ClientObjectList cInfo = restTemplate.getForObject(bootStrapServerURL+"/clientObjects/"+deviceId, ClientObjectList.class);
 		bInfo.setObjList(cInfo);
