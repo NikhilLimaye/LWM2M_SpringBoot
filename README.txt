@@ -34,3 +34,33 @@ PUT - http://localhost:8080/client/update/SMS/1 - SMS number of registered devic
 
 CLIENT DEREGISTER
 DELETE - http://localhost:8080/client/deregister/1 - Device will be removed from server database
+
+----------------------------------------------------------------
+DEVICE MANAGEMEMT - 
+READ 
+GET - http://localhost:8082/server/dvmgt/1/2
+GET - http://localhost:8082/server/dvmgt/1/2/2
+
+WRITE
+PUT - http://localhost:8082/server/dvmgt/1/2/2 - Updated ACL
+
+CREATE 
+POST - http://localhost:8082/server/dvmgt/6/0 - New Object Instance
+
+DISCOVER
+GET - http://localhost:8082/server/dvmgt/discover/6/1
+
+----------------------------------------------------------------
+INFORMATION REPORTING 
+
+OBSERVE 
+POST - http://localhost:8082/server/observe/1/2
+
+WRITE ATTRIBUTE
+PUT - http://localhost:8080/client/attribute/6/1 - Updated pmax
+
+NOTIFY 
+POST - http://localhost:8080/client/notification/1/2
+
+
+
